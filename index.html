@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>تقييم زيارتك | Way2Go</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Caveat:wght@600;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#d97f1e;--panel:#1d3f12;--surface:#24501a;--surface2:#2b5a20;--surface3:#336a28;
+      --orange:#d9a634;--orange-dim:rgba(217,166,52,0.15);--orange-glow:rgba(217,166,52,0.3);
+      --border:rgba(255,255,255,0.10);--border-orange:rgba(217,166,52,0.42);
+      --frame:#e0900f;--frame-dark:#b46f0d;
+      --text:#ffffff;--text-muted:#bcd4ac;--text-dim:#719063;
+      --red:#ef4444;--red-dim:rgba(239,68,68,0.12);--red-border:rgba(239,68,68,0.4);
+      --green:#22c55e;--green-dim:rgba(34,197,94,0.12);--green-border:rgba(34,197,94,0.35);
+      --radius:14px;
+    }
+    html{scroll-behavior:smooth;}
+    body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events:none;z-index:0;opacity:0.5;
+    }
+
+    /* POSTER FRAME — mimics the printed menu card look */
+    .poster-frame{position:relative;max-width:860px;margin:18px auto;padding:20px;}
+    .poster{
+      position:relative;z-index:2;overflow:hidden;
+      background:linear-gradient(180deg,var(--panel),#173410);
+      border:8px solid var(--frame);
+      border-radius:26px;
+      box-shadow:0 24px 70px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .corner-deco{position:absolute;z-index:1;width:92px;height:92px;pointer-events:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));}
+    .corner-deco svg{width:100%;height:100%;display:block;}
+    .corner-tl{top:-18px;left:-18px;transform:rotate(-8deg);}
+    .corner-tr{top:-18px;right:-18px;transform:rotate(100deg) scaleX(-1);}
+    .corner-bl{bottom:-18px;left:-18px;transform:rotate(-100deg) scaleX(-1);}
+    .corner-br{bottom:-18px;right:-18px;transform:rotate(190deg);}
+    @media(max-width:600px){
+      .poster-frame{padding:12px;margin:10px auto;}
+      .poster{border-width:6px;border-radius:20px;}
+      .corner-deco{width:64px;height:64px;}
+      .corner-tl{top:-12px;left:-12px;}
+      .corner-tr{top:-12px;right:-12px;}
+      .corner-bl{bottom:-12px;left:-12px;}
+      .corner-br{bottom:-12px;right:-12px;}
+    }
+
+    /* GOLD SCRIPT FLOURISH behind hero title */
+    .hero-flourish{
+      position:absolute;top:6px;left:50%;transform:translateX(-50%) rotate(-6deg);
+      font-family:'Caveat',cursive;font-size:38px;font-weight:700;
+      color:var(--orange);opacity:.55;letter-spacing:.02em;
+      pointer-events:none;white-space:nowrap;
+    }
+
+    /* TOPBAR */
+    .topbar{position:sticky;top:0;z-index:100;background:rgba(29,63,18,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;}
+    .topbar-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:60px;}
+    .logo{display:flex;align-items:center;gap:10px;}
+    .logo-img-wrap{width:52px;height:38px;border-radius:9px;overflow:hidden;display:grid;place-items:center;padding:2px;}
+    .logo-img{width:100%;height:100%;object-fit:contain;}
+    .logo-solutions{font-size:10px;opacity:.6;letter-spacing:.08em;}
+    .topbar-tag{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;}
+
+    /* HERO */
+    .hero{position:relative;padding:48px 20px 36px;text-align:center;overflow:hidden;}
+    .hero::after{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:500px;height:200px;background:radial-gradient(ellipse,var(--orange-glow),transparent 70%);pointer-events:none;}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--orange);letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--border-orange);background:var(--orange-dim);padding:6px 14px;border-radius:999px;margin-bottom:20px;}
+    .hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--orange);display:block;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+    .hero h1{font-family:'Aref Ruqaa','Cairo',serif;font-size:clamp(40px,9vw,72px);font-weight:700;line-height:1.15;letter-spacing:0;margin-bottom:14px;}
+    .hero h1 span{color:var(--orange);}
+    .hero-sub{font-size:14px;color:var(--text-muted);max-width:400px;margin:0 auto;line-height:1.8;}
+
+    /* PROGRESS */
+    .progress-wrap{max-width:760px;margin:0 auto;padding:0 20px 24px;}
+    .progress-track{height:2px;background:var(--surface3);border-radius:999px;overflow:hidden;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),#fbaa4f);border-radius:999px;transition:width .4s cubic-bezier(.4,0,.2,1);width:0%;}
+    .progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-top:6px;letter-spacing:.05em;}
+
+    /* FORM WRAP */
+    .form-wrap{max-width:760px;margin:0 auto;padding:0 20px 60px;position:relative;z-index:1;}
+
+    /* CARD */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:12px;transition:border-color .2s;}
+    .card:focus-within{border-color:var(--border-orange);}
+    .card.card-error{border-color:var(--red-border);animation:shake .3s ease;}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+    .card-title{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .card-icon{width:32px;height:32px;border-radius:8px;background:var(--orange-dim);border:1px solid var(--border-orange);display:grid;place-items:center;font-size:15px;flex-shrink:0;color:var(--orange);}
+    .card-icon svg{width:17px;height:17px;stroke:currentColor;}
+    .card-label{font-family:'Cairo',sans-serif;font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text);}
+    .card-num{margin-right:auto;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;color:var(--text-dim);letter-spacing:.1em;}
+
+    /* REQUIRED BADGE */
+    .req{color:var(--red);font-size:11px;margin-right:4px;}
+
+    /* FIELD */
+    .field-group{margin-bottom:14px;position:relative;}
+    .field-group:last-child{margin-bottom:0;}
+    .field-group label{display:block;font-size:11px;font-weight:800;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;}
+    .field{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-size:16px;font-family:'Cairo',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;}
+    .field:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-dim);}
+    .field.is-error{border-color:var(--red)!important;box-shadow:0 0 0 3px var(--red-dim)!important;}
+    .field.is-valid{border-color:var(--green)!important;box-shadow:0 0 0 2px var(--green-dim)!important;}
+    textarea.field{height:88px;resize:vertical;line-height:1.7;}
+    select.field{cursor:pointer;}
+    .field::placeholder{color:var(--text-dim);}
+
+    /* FIELD STATUS ICON */
+    .field-wrap{position:relative;}
+    .field-wrap .field{padding-left:36px;}
+    .field-status{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;}
+    .field-wrap.has-error .field-status{opacity:1;color:var(--red);}
+    .field-wrap.has-valid .field-status{opacity:1;color:var(--green);}
+
+    /* ERROR MSG */
+    .error-msg{
+      display:none;
+      align-items:center;gap:5px;
+      font-size:11px;font-weight:700;
+      color:var(--red);
+      margin-top:5px;
+      letter-spacing:.03em;
+    }
+    .error-msg.show{display:flex;}
+    .error-msg::before{content:'!';width:14px;height:14px;border-radius:50%;background:var(--red-dim);border:1px solid var(--red);display:grid;place-items:center;font-size:9px;flex-shrink:0;}
+
+    /* RATING ROW */
+    .rating-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);position:relative;}
+    .rating-row:last-child{border-bottom:none;padding-bottom:0;}
+    .rating-row:first-child{padding-top:0;}
+    .rating-row.row-error .rating-label{color:var(--red);}
+    .rating-label{font-size:13px;font-weight:700;color:var(--text);}
+    .rating-label small{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin-top:2px;}
+
+    /* ERROR DOT ON RATING */
+    .rating-row.row-error::after{
+      content:'لازم تكتبه';
+      position:absolute;
+      top:50%;right:0;transform:translateY(-50%);
+      font-size:9px;font-weight:800;letter-spacing:.08em;
+      color:var(--red);
+      background:var(--red-dim);
+      border:1px solid var(--red-border);
+      padding:2px 7px;border-radius:999px;
+      pointer-events:none;
+    }
+
+    /* STARS */
+    .stars{display:flex;gap:2px;flex-direction:row-reverse;}
+    .stars input{display:none;}
+    .stars label{font-size:22px;cursor:pointer;color:var(--surface3);transition:color .1s,transform .1s;line-height:1;}
+    .stars label:hover{transform:scale(1.15);}
+    .stars input:checked ~ label,.stars label:hover,.stars label:hover ~ label{color:var(--orange);}
+
+    /* 2-COL GRID */
+    .field-row{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:540px){.field-row{grid-template-columns:1fr 1fr;}}
+
+    /* PHONE FIELD */
+    .phone-wrap{position:relative;}
+    .phone-prefix{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      font-size:12px;font-weight:700;color:var(--text-muted);
+      pointer-events:none;user-select:none;
+      display:flex;align-items:center;gap:4px;
+    }
+    .phone-field{padding-right:68px!important;}
+
+    /* USAGE PILLS */
+    .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+    .pill{
+      padding:7px 14px;border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--surface2);
+      font-size:12px;font-weight:700;color:var(--text-muted);
+      cursor:pointer;transition:all .15s;user-select:none;
+    }
+    .pill:hover{border-color:var(--border-orange);color:var(--orange);}
+    .pill.active{border-color:var(--orange);color:var(--orange);background:var(--orange-dim);}
+    .pills.pills-error .pill{border-color:var(--red-border);}
+
+    /* NPS */
+    .nps-title{font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;}
+    .nps-wrap{display:grid;grid-template-columns:repeat(11,1fr);gap:5px;}
+    .nps-btn{width:100%;aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;font-family:'Cairo',sans-serif;display:grid;place-items:center;touch-action:manipulation;}
+    .nps-btn:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-dim);}
+    .nps-btn.active{border-color:var(--orange);border-width:2px;color:var(--orange);background:var(--orange-dim);}
+    .nps-wrap.nps-error .nps-btn{border-color:var(--red-border);}
+    .nps-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text-dim);}
+
+    /* SUBMIT */
+    .submit-wrap{text-align:center;margin-top:20px;}
+
+    /* VALIDATION SUMMARY */
+    .val-summary{
+      display:none;
+      background:var(--red-dim);
+      border:1px solid var(--red-border);
+      border-radius:var(--radius);
+      padding:14px 18px;
+      margin-bottom:16px;
+      font-size:12px;font-weight:700;color:var(--red);
+      line-height:1.8;
+    }
+    .val-summary.show{display:block;}
+    .val-summary strong{display:block;margin-bottom:4px;font-size:13px;}
+
+    .submit-btn{
+      display:inline-flex;align-items:center;gap:10px;
+      background:var(--orange);color:#0c1f16;border:none;
+      padding:14px 48px;border-radius:8px;
+      font-size:15px;font-weight:800;font-family:'Cairo',sans-serif;
+      cursor:pointer;letter-spacing:.02em;transition:all .2s;
+      box-shadow:0 0 32px var(--orange-glow);
+    }
+    .submit-btn:hover{background:#e8bb56;transform:translateY(-2px);box-shadow:0 0 48px var(--orange-glow);}
+    .submit-btn:active{transform:translateY(0);}
+    .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .submit-btn svg{width:16px;height:16px;flex-shrink:0;}
+
+    /* SUCCESS */
+    .success-msg{display:none;text-align:center;padding:80px 20px;animation:fadeUp .5s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    .success-icon{width:72px;height:72px;border-radius:50%;background:var(--orange-dim);border:2px solid var(--border-orange);display:grid;place-items:center;font-size:32px;margin:0 auto 24px;}
+    .success-msg h2{font-family:'Cairo',sans-serif;font-size:42px;font-weight:900;margin-bottom:12px;}
+    .success-msg h2 span{color:var(--orange);}
+    .success-msg p{font-size:14px;color:var(--text-muted);line-height:1.8;}
+
+    /* COUPON */
+    .coupon-box{
+      display:inline-flex;flex-direction:column;align-items:center;gap:6px;
+      margin-top:28px;padding:18px 32px;
+      border:2px dashed var(--border-orange);
+      border-radius:14px;
+      background:var(--orange-dim);
+    }
+    .coupon-label{font-size:11px;font-weight:800;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;}
+    .coupon-code{font-family:'Cairo',sans-serif;font-size:28px;font-weight:900;color:var(--orange);letter-spacing:.08em;}
+    .coupon-sub{font-size:11px;color:var(--text-dim);max-width:260px;line-height:1.6;}
+
+    /* FOOTER */
+    .footer{text-align:center;padding:20px;font-size:11px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;border-top:1px solid var(--border);}
+    .footer span{color:var(--orange);}
+
+    /* RESPONSIVE — mobile first */
+    @media(max-width:600px){
+      .hero{padding:28px 16px 20px;}
+      .hero h1{font-size:clamp(32px,10vw,48px);}
+      .hero-sub{font-size:13px;}
+      .progress-wrap{padding:0 16px 20px;}
+      .form-wrap{padding:0 12px 48px;}
+      .card{padding:16px 12px;margin-bottom:10px;}
+      .card-label{font-size:14px;}
+      .topbar{padding:0 14px;}
+      .topbar-inner{height:52px;}
+      .card-icon{width:28px;height:28px;font-size:13px;}
+      .hero-eyebrow{font-size:10px;padding:5px 12px;}
+
+      .field{font-size:16px;padding:12px 14px;}
+      select.field{font-size:16px;}
+      textarea.field{font-size:16px;height:96px;}
+
+      .rating-row{grid-template-columns:1fr;gap:8px;padding:12px 0;}
+      .stars{flex-direction:row;justify-content:flex-start;gap:6px;}
+      .stars label{font-size:28px;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;}
+
+      .rating-row.row-error::after{
+        position:static;transform:none;
+        display:inline-block;margin-top:4px;
+      }
+
+      .pill{padding:8px 14px;font-size:12px;min-height:40px;display:flex;align-items:center;}
+
+      .submit-btn{width:100%;justify-content:center;padding:16px 24px;font-size:15px;min-height:52px;}
+
+      .card-num{display:none;}
+    }
+
+    .field:focus{transform:translateY(-1px);}
+
+    /* CHOICE MODAL */
+    .choice-overlay{
+      position:fixed;inset:0;z-index:1000;
+      background:rgba(10,20,6,0.92);
+      backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+    }
+    .choice-box{
+      position:relative;width:100%;max-width:420px;
+      background:linear-gradient(180deg,var(--panel),#173410);
+      border:2px solid var(--frame);
+      border-radius:22px;
+      padding:36px 28px;
+      text-align:center;
+      box-shadow:0 24px 70px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,0.04);
+      animation:fadeUp .4s ease;
+    }
+    .choice-flourish{
+      font-family:'Caveat',cursive;font-size:30px;font-weight:700;
+      color:var(--orange);opacity:.6;margin-bottom:6px;
+    }
+    .choice-box h2{
+      font-family:'Aref Ruqaa','Cairo',serif;font-size:clamp(26px,7vw,34px);
+      font-weight:700;margin-bottom:10px;color:var(--text);
+    }
+    .choice-box h2 span{color:var(--orange);}
+    .choice-box p{font-size:13px;color:var(--text-muted);line-height:1.8;margin-bottom:28px;}
+    .choice-btns{display:flex;flex-direction:column;gap:14px;}
+    .choice-btn{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      padding:16px 20px;border-radius:12px;
+      font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;
+      cursor:pointer;transition:all .2s;border:1px solid var(--border-orange);
+    }
+    .choice-btn svg{width:18px;height:18px;flex-shrink:0;}
+    .choice-btn.btn-menu{background:var(--surface2);color:var(--text);}
+    .choice-btn.btn-menu:hover{border-color:var(--orange);color:var(--orange);transform:translateY(-2px);}
+    .choice-btn.btn-feedback{background:var(--orange);color:#0c1f16;box-shadow:0 0 32px var(--orange-glow);}
+    .choice-btn.btn-feedback:hover{background:#e8bb56;transform:translateY(-2px);box-shadow:0 0 48px var(--orange-glow);}
+    #mainContent{display:none;}
+    @media(max-width:600px){
+      .choice-box{padding:28px 20px;border-radius:18px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="choice-overlay" id="choiceOverlay">
+  <div class="choice-box">
+    <h2>أهلاً بيك في <span>Way2Go</span></h2>
+    <p>تحب تعمل ايه دلوقتي؟</p>
+    <div class="choice-btns">
+      <button type="button" class="choice-btn btn-menu" id="btnMenu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        شوف المنيو
+      </button>
+      <button type="button" class="choice-btn btn-feedback" id="btnFeedback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+         اقول التجربه بتاعتي
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="mainContent">
+<div class="poster-frame">
+
+  <div class="corner-deco corner-tl">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="42" cy="58" r="34" fill="#f2a53a" stroke="#c4700f" stroke-width="5"/>
+      <circle cx="42" cy="58" r="26" fill="#fbe6c0"/>
+      <g stroke="#f0983a" stroke-width="2.4" opacity=".85">
+        <line x1="42" y1="58" x2="42" y2="33"/>
+        <line x1="42" y1="58" x2="63" y2="45"/>
+        <line x1="42" y1="58" x2="65" y2="68"/>
+        <line x1="42" y1="58" x2="50" y2="82"/>
+        <line x1="42" y1="58" x2="27" y2="80"/>
+        <line x1="42" y1="58" x2="19" y2="60"/>
+        <line x1="42" y1="58" x2="22" y2="40"/>
+      </g>
+      <path d="M62,22 Q84,14 78,40 Q56,44 62,22 Z" fill="#4c7a3b"/>
+      <path d="M62,22 Q68,30 64,38" stroke="#345226" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="corner-deco corner-tr">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="42" cy="58" r="34" fill="#f2a53a" stroke="#c4700f" stroke-width="5"/>
+      <circle cx="42" cy="58" r="26" fill="#fbe6c0"/>
+      <g stroke="#f0983a" stroke-width="2.4" opacity=".85">
+        <line x1="42" y1="58" x2="42" y2="33"/>
+        <line x1="42" y1="58" x2="63" y2="45"/>
+        <line x1="42" y1="58" x2="65" y2="68"/>
+        <line x1="42" y1="58" x2="50" y2="82"/>
+        <line x1="42" y1="58" x2="27" y2="80"/>
+        <line x1="42" y1="58" x2="19" y2="60"/>
+        <line x1="42" y1="58" x2="22" y2="40"/>
+      </g>
+      <path d="M62,22 Q84,14 78,40 Q56,44 62,22 Z" fill="#4c7a3b"/>
+      <path d="M62,22 Q68,30 64,38" stroke="#345226" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="corner-deco corner-bl">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="42" cy="58" r="34" fill="#f2a53a" stroke="#c4700f" stroke-width="5"/>
+      <circle cx="42" cy="58" r="26" fill="#fbe6c0"/>
+      <g stroke="#f0983a" stroke-width="2.4" opacity=".85">
+        <line x1="42" y1="58" x2="42" y2="33"/>
+        <line x1="42" y1="58" x2="63" y2="45"/>
+        <line x1="42" y1="58" x2="65" y2="68"/>
+        <line x1="42" y1="58" x2="50" y2="82"/>
+        <line x1="42" y1="58" x2="27" y2="80"/>
+        <line x1="42" y1="58" x2="19" y2="60"/>
+        <line x1="42" y1="58" x2="22" y2="40"/>
+      </g>
+      <path d="M62,22 Q84,14 78,40 Q56,44 62,22 Z" fill="#4c7a3b"/>
+      <path d="M62,22 Q68,30 64,38" stroke="#345226" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="corner-deco corner-br">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="42" cy="58" r="34" fill="#f2a53a" stroke="#c4700f" stroke-width="5"/>
+      <circle cx="42" cy="58" r="26" fill="#fbe6c0"/>
+      <g stroke="#f0983a" stroke-width="2.4" opacity=".85">
+        <line x1="42" y1="58" x2="42" y2="33"/>
+        <line x1="42" y1="58" x2="63" y2="45"/>
+        <line x1="42" y1="58" x2="65" y2="68"/>
+        <line x1="42" y1="58" x2="50" y2="82"/>
+        <line x1="42" y1="58" x2="27" y2="80"/>
+        <line x1="42" y1="58" x2="19" y2="60"/>
+        <line x1="42" y1="58" x2="22" y2="40"/>
+      </g>
+      <path d="M62,22 Q84,14 78,40 Q56,44 62,22 Z" fill="#4c7a3b"/>
+      <path d="M62,22 Q68,30 64,38" stroke="#345226" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+
+  <div class="poster">
+
+<section class="hero">
+  <h1>قيّم <span>زيارتك</span><br/>في Way2Go</h1>
+  <p class="hero-sub">رأيك بيفرق معانا كل تقييم بيساعدنا نقدملك تجربة أحلى في كل زيارة</p>
+</section>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label">
+    <span id="progressText">كده خلصت 0% </span>
+    <span>WAY2GO</span>
+  </div>
+</div>
+
+<div class="form-wrap">
+  <form id="feedbackForm" novalidate>
+
+    <!-- بيانات الزيارة -->
+    <div class="card" id="card-visit">
+      <div class="card-title">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M17 9h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3c0 .8-.7 1-.7 1.8S8 6 8 6"/><path d="M12 3c0 .8-.7 1-.7 1.8s.7 1.2.7 1.2"/></svg></div>
+        <div class="card-label">بيانات الزيارة</div>
+        <div class="card-num">01 / 05</div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>الاسم</label>
+          <input class="field" type="text" name="customerName" id="customerName" placeholder="اسمك (اختياري)"/>
+        </div>
+        <div class="field-group">
+          <label>رقم التليفون <span style="color:var(--text-dim);font-weight:600;text-transform:none;letter-spacing:0;">(اختياري)</span></label>
+          <div class="phone-wrap">
+            <span class="phone-prefix">🇪🇬 +20</span>
+            <input class="field phone-field" type="tel" name="phone" id="phone" placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric"/>
+          </div>
+          <div class="error-msg" id="err-phone">أدخل رقم تليفون صحيح (01XXXXXXXXX)</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label><span class="req">*</span>نوع الزيارة</label>
+        <select class="field" name="visitType" id="visitType">
+          <option value="">— اختر نوع الطلب —</option>
+          <option>في الكافيه</option>
+          <option>تيك أواي</option>
+          <option>دليفري</option>
+        </select>
+        <div class="error-msg" id="err-visitType">اختر نوع الزيارة</div>
+      </div>
+      <div class="field-group">
+        <label><span class="req">*</span>بتزور Way2Go قد ايه؟</label>
+        <div class="pills" id="pills-usage">
+          <span class="pill" data-val="أول مرة">أول مرة</span>
+          <span class="pill" data-val="بين فترة وفترة">بين فترة وفترة</span>
+          <span class="pill" data-val="زبون دائم"> باجي كتير</span>
+          <span class="pill" data-val="يومي تقريباً">يوميا تقريباً</span>
+        </div>
+        <input type="hidden" name="visitFrequency" id="visitFrequency"/>
+        <div class="error-msg" id="err-usage">اختر عدد مرات الزيارة</div>
+      </div>
+    </div>
+
+    <!-- تقييم المشروبات والأكل -->
+    <div class="card" id="card-menu">
+      <div class="card-title">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2 13 5"/><path d="M6 5h13l-1.5 15a2 2 0 0 1-2 1.8H9.5a2 2 0 0 1-2-1.8L6 5Z"/><path d="M5 5h15"/><path d="M12 9v8"/></svg></div>
+        <div class="card-label">المشروبات والأكل</div>
+        <div class="card-num">02 / 05</div>
+      </div>
+      <div class="rating-row" id="row-drinks">
+        <div class="rating-label">طعم المشروبات<small>عجباك طعم اللي شربته؟</small></div>
+        <div class="stars">
+          <input type="radio" name="drinks" id="drinks5" value="5"/><label for="drinks5">★</label>
+          <input type="radio" name="drinks" id="drinks4" value="4"/><label for="drinks4">★</label>
+          <input type="radio" name="drinks" id="drinks3" value="3"/><label for="drinks3">★</label>
+          <input type="radio" name="drinks" id="drinks2" value="2"/><label for="drinks2">★</label>
+          <input type="radio" name="drinks" id="drinks1" value="1"/><label for="drinks1">★</label>
+        </div>
+      </div>
+      <div class="rating-row" id="row-food">
+        <div class="rating-label">طعم الأكل والحلويات<small>لو طلبت أكل، عجبك؟</small></div>
+        <div class="stars">
+          <input type="radio" name="food" id="food5" value="5"/><label for="food5">★</label>
+          <input type="radio" name="food" id="food4" value="4"/><label for="food4">★</label>
+          <input type="radio" name="food" id="food3" value="3"/><label for="food3">★</label>
+          <input type="radio" name="food" id="food2" value="2"/><label for="food2">★</label>
+          <input type="radio" name="food" id="food1" value="1"/><label for="food1">★</label>
+        </div>
+      </div>
+      <div class="rating-row" id="row-variety">
+        <div class="rating-label">تنوع المنيو<small>فيه اختيارات كفاية تناسبك؟</small></div>
+        <div class="stars">
+          <input type="radio" name="variety" id="var5" value="5"/><label for="var5">★</label>
+          <input type="radio" name="variety" id="var4" value="4"/><label for="var4">★</label>
+          <input type="radio" name="variety" id="var3" value="3"/><label for="var3">★</label>
+          <input type="radio" name="variety" id="var2" value="2"/><label for="var2">★</label>
+          <input type="radio" name="variety" id="var1" value="1"/><label for="var1">★</label>
+        </div>
+      </div>
+      <div class="rating-row" id="row-value">
+        <div class="rating-label">السعر مقابل القيمة<small>الأسعار مناسبة لجودة اللي بتاخده؟</small></div>
+        <div class="stars">
+          <input type="radio" name="value" id="val5" value="5"/><label for="val5">★</label>
+          <input type="radio" name="value" id="val4" value="4"/><label for="val4">★</label>
+          <input type="radio" name="value" id="val3" value="3"/><label for="val3">★</label>
+          <input type="radio" name="value" id="val2" value="2"/><label for="val2">★</label>
+          <input type="radio" name="value" id="val1" value="1"/><label for="val1">★</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- الخدمة والمكان -->
+    <div class="card" id="card-service">
+      <div class="card-title">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17h20"/><path d="M4 17a8 8 0 0 1 16 0"/><path d="M12 5V3"/></svg></div>
+        <div class="card-label">الخدمة والمكان</div>
+        <div class="card-num">03 / 05</div>
+      </div>
+      <div class="rating-row" id="row-speed">
+        <div class="rating-label">سرعة تحضير الطلب<small>استنيت كتير؟</small></div>
+        <div class="stars">
+          <input type="radio" name="speed" id="speed5" value="5"/><label for="speed5">★</label>
+          <input type="radio" name="speed" id="speed4" value="4"/><label for="speed4">★</label>
+          <input type="radio" name="speed" id="speed3" value="3"/><label for="speed3">★</label>
+          <input type="radio" name="speed" id="speed2" value="2"/><label for="speed2">★</label>
+          <input type="radio" name="speed" id="speed1" value="1"/><label for="speed1">★</label>
+        </div>
+      </div>
+      <div class="rating-row" id="row-staff">
+        <div class="rating-label">تعامل الموظفين<small>الاستقبال والود كانوا عاملين إزاي؟</small></div>
+        <div class="stars">
+          <input type="radio" name="staff" id="staff5" value="5"/><label for="staff5">★</label>
+          <input type="radio" name="staff" id="staff4" value="4"/><label for="staff4">★</label>
+          <input type="radio" name="staff" id="staff3" value="3"/><label for="staff3">★</label>
+          <input type="radio" name="staff" id="staff2" value="2"/><label for="staff2">★</label>
+          <input type="radio" name="staff" id="staff1" value="1"/><label for="staff1">★</label>
+        </div>
+      </div>
+      <div class="rating-row" id="row-cleanliness">
+        <div class="rating-label">نظافة المكان<small>الطاولات والمكان عموماً نضيفين؟</small></div>
+        <div class="stars">
+          <input type="radio" name="cleanliness" id="clean5" value="5"/><label for="clean5">★</label>
+          <input type="radio" name="cleanliness" id="clean4" value="4"/><label for="clean4">★</label>
+          <input type="radio" name="cleanliness" id="clean3" value="3"/><label for="clean3">★</label>
+          <input type="radio" name="cleanliness" id="clean2" value="2"/><label for="clean2">★</label>
+          <input type="radio" name="cleanliness" id="clean1" value="1"/><label for="clean1">★</label>
+        </div>
+      </div>
+      <div class="rating-row" id="row-ambience">
+        <div class="rating-label">الأجواء والديكور<small>حسيت بجو مريح للجلوس؟</small></div>
+        <div class="stars">
+          <input type="radio" name="ambience" id="amb5" value="5"/><label for="amb5">★</label>
+          <input type="radio" name="ambience" id="amb4" value="4"/><label for="amb4">★</label>
+          <input type="radio" name="ambience" id="amb3" value="3"/><label for="amb3">★</label>
+          <input type="radio" name="ambience" id="amb2" value="2"/><label for="amb2">★</label>
+          <input type="radio" name="ambience" id="amb1" value="1"/><label for="amb1">★</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- NPS -->
+    <div class="card" id="card-nps">
+      <div class="card-title">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 0 0 1 1h2l4 5v-15L6 9H4a1 1 0 0 0-1 1Z"/><path d="M15 8a4 4 0 0 1 0 7"/><path d="M18 5a8 8 0 0 1 0 13"/></svg></div>
+        <div class="card-label">هل تنصح بـ Way2Go؟</div>
+        <div class="card-num">04 / 05</div>
+      </div>
+      <p class="nps-title"><span class="req">*</span>على مقياس من 0 إلى 10، هل ستنصح أصحابك بـ Way2Go؟</p>
+      <div class="nps-wrap" id="npsWrap">
+        <button type="button" class="nps-btn" data-val="0">0</button>
+        <button type="button" class="nps-btn" data-val="1">1</button>
+        <button type="button" class="nps-btn" data-val="2">2</button>
+        <button type="button" class="nps-btn" data-val="3">3</button>
+        <button type="button" class="nps-btn" data-val="4">4</button>
+        <button type="button" class="nps-btn" data-val="5">5</button>
+        <button type="button" class="nps-btn" data-val="6">6</button>
+        <button type="button" class="nps-btn" data-val="7">7</button>
+        <button type="button" class="nps-btn" data-val="8">8</button>
+        <button type="button" class="nps-btn" data-val="9">9</button>
+        <button type="button" class="nps-btn" data-val="10">10</button>
+      </div>
+      <div class="nps-labels"><span>لن أنصح به</span><span>بالتأكيد سأنصح</span></div>
+      <div class="error-msg" id="err-nps" style="margin-top:10px">اختر تقييمك من 0 إلى 10</div>
+      <input type="hidden" name="nps" id="npsVal"/>
+    </div>
+
+    <!-- أسئلة مفتوحة -->
+    <div class="card">
+      <div class="card-title">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="M15 5l4 4"/></svg></div>
+        <div class="card-label">بصراحة</div>
+        <div class="card-num">05 / 05</div>
+      </div>
+      <div class="field-group">
+        <label>أكتر حاجة عجباك في Way2Go</label>
+        <textarea class="field" name="bestThing" placeholder="اكتب هنا..."></textarea>
+      </div>
+      <div class="field-group">
+        <label>أكتر حاجة تحب تتحسن</label>
+        <textarea class="field" name="improveThing" placeholder="اكتب هنا..."></textarea>
+      </div>
+      <div class="field-group">
+        <label>حابب تشوف ايه جديد في المنيو؟</label>
+        <textarea class="field" name="wishFeature" placeholder="اكتب هنا..."></textarea>
+      </div>
+    </div>
+
+    <div class="val-summary" id="valSummary">
+      <strong>⚠️ في حاجات ناقصة قبل ما نبعت:</strong>
+      <span id="valList"></span>
+    </div>
+
+    <div class="submit-wrap">
+      <button type="submit" class="submit-btn">
+        إبعت تقييمك
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </form>
+
+  <div class="success-msg" id="successMsg">
+    <div class="success-icon">✓</div>
+    <h2>شكراً <span>ليك!</span></h2>
+    <p>تقييمك وصلنا وهيساعدنا كتير<br/>نتمنى نشوفك تاني قريب في Way2Go</p>
+  </div>
+</div>
+
+<footer class="footer">
+  © <a href="https://fateen1.me" target="_blank" rel="noopener noreferrer" style="color:var(--orange);font-weight:700;text-decoration:none;">Fateen Digital Solutions</a> — CUSTOMER FEEDBACK — 2026
+</footer>
+
+  </div><!-- /.poster -->
+</div><!-- /.poster-frame -->
+</div><!-- /#mainContent -->
+
+<script>
+  let npsValue = null;
+  const ratingFields = ['drinks','food','variety','value','speed','staff','cleanliness','ambience'];
+
+  // ── NPS ──────────────────────────────────────────────────────────────
+  document.querySelectorAll('.nps-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.nps-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      npsValue = Number(btn.dataset.val);
+      document.getElementById('npsVal').value = npsValue;
+      document.getElementById('npsWrap').classList.remove('nps-error');
+      document.getElementById('err-nps').classList.remove('show');
+      updateProgress();
+    };
+  });
+
+  // ── VISIT FREQUENCY PILLS ──────────────────────────────────────────────
+  document.querySelectorAll('#pills-usage .pill').forEach(pill => {
+    pill.onclick = () => {
+      document.querySelectorAll('#pills-usage .pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      document.getElementById('visitFrequency').value = pill.dataset.val;
+      document.getElementById('pills-usage').classList.remove('pills-error');
+      document.getElementById('err-usage').classList.remove('show');
+      updateProgress();
+    };
+  });
+
+  // ── PROGRESS ──────────────────────────────────────────────────────────
+  function updateProgress(){
+    let filled = 0, total = 0;
+    ['phone','visitType','visitFrequency'].forEach(f => {
+      total++;
+      const el = document.getElementById(f) || document.querySelector(`[name="${f}"]`);
+      if(el && el.value.trim()) filled++;
+    });
+    ratingFields.forEach(f => {
+      total++;
+      if(document.querySelector(`input[name="${f}"]:checked`)) filled++;
+    });
+    total++;
+    if(npsValue !== null) filled++;
+
+    const pct = Math.round((filled / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = pct + '% مكتمل';
+  }
+
+  document.querySelectorAll('.stars input').forEach(i => i.onchange = () => {
+    const row = i.closest('.rating-row');
+    if(row){ row.classList.remove('row-error'); }
+    updateProgress();
+  });
+  document.getElementById('visitType').onchange = () => { validateSelect('visitType'); updateProgress(); };
+  document.getElementById('phone').oninput = function(){
+    this.value = this.value.replace(/\D/g,'');
+    validatePhone();
+    updateProgress();
+  };
+
+  // ── FIELD VALIDATORS ─────────────────────────────────────────────────
+  function validateSelect(id){
+    const el = document.getElementById(id);
+    const ok = el && el.value !== '';
+    if(el){ el.classList.toggle('is-error', !ok); el.classList.toggle('is-valid', ok); }
+    const err = document.getElementById('err-' + id);
+    if(err) err.classList.toggle('show', !ok);
+    return ok;
+  }
+
+  function validatePhone(){
+    const el = document.getElementById('phone');
+    const v = el.value.trim();
+    const okFormat = /^01[0-9]{9}$/.test(v);
+    const ok = v.length === 0 || okFormat;
+    el.classList.toggle('is-error', v.length > 0 && !okFormat);
+    el.classList.toggle('is-valid', okFormat);
+    const err = document.getElementById('err-phone');
+    if(err) err.classList.toggle('show', v.length > 0 && !okFormat);
+    return ok;
+  }
+
+  function validateRating(name, rowId){
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    const row = document.getElementById(rowId);
+    if(row) row.classList.toggle('row-error', !checked);
+    return !!checked;
+  }
+
+  function validateNPS(){
+    const ok = npsValue !== null;
+    document.getElementById('npsWrap').classList.toggle('nps-error', !ok);
+    document.getElementById('err-nps').classList.toggle('show', !ok);
+    return ok;
+  }
+
+  function validateUsage(){
+    const ok = document.getElementById('visitFrequency').value !== '';
+    document.getElementById('pills-usage').classList.toggle('pills-error', !ok);
+    document.getElementById('err-usage').classList.toggle('show', !ok);
+    return ok;
+  }
+
+  // ── TELEGRAM CONFIG ───────────────────────────────────────────────────
+  const BOT_TOKEN = '8958693497:AAEK3snttbiig3M3q5-L1nCbHIAbOrJ0uKA';
+  const CHAT_ID   = '-1003986292638';
+
+  function stars(val){ return val ? '★'.repeat(+val) + '☆'.repeat(5 - +val) + ` (${val}/5)` : '—'; }
+  function npsCategory(n){
+    if(n === null || n === '') return '—';
+    if(n >= 9) return `${n}/10 🟢 Promoter`;
+    if(n >= 7) return `${n}/10 🟡 Passive`;
+    return `${n}/10 🔴 Detractor`;
+  }
+
+  function buildMessage(r){
+    const time = new Date().toLocaleString('ar-EG', {timeZone:'Africa/Cairo'});
+    const avg = () => {
+      const vals = ratingFields.map(f => r[f]).filter(Boolean).map(Number);
+      if(!vals.length) return '—';
+      return (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1) + '/5';
+    };
+    return `
+☕ *فيدباك جديد — Way2Go*
+━━━━━━━━━━━━━━━━━━
+
+📝 *بيانات الزيارة*
+• الاسم: ${r.customerName || '—'}
+• التليفون: ${r.phone ? '+20' + r.phone : '—'}
+• نوع الزيارة: ${r.visitType || '—'}
+• بيزور قد ايه: ${r.visitFrequency || '—'}
+
+🥤 *المشروبات والأكل*
+• طعم المشروبات: ${stars(r.drinks)}
+• طعم الأكل: ${stars(r.food)}
+• تنوع المنيو: ${stars(r.variety)}
+• السعر مقابل القيمة: ${stars(r.value)}
+
+🛎️ *الخدمة والمكان*
+• سرعة التحضير: ${stars(r.speed)}
+• تعامل الموظفين: ${stars(r.staff)}
+• نظافة المكان: ${stars(r.cleanliness)}
+• الأجواء والديكور: ${stars(r.ambience)}
+• 📊 متوسط التقييم: ${avg()}
+
+📣 *NPS*
+• التقييم: ${npsCategory(r.nps !== '' ? Number(r.nps) : null)}
+
+✏️ *بصراحة*
+• أكتر حاجة عجباه: ${r.bestThing || '—'}
+• أكتر حاجة تتحسن: ${r.improveThing || '—'}
+• طلب جديد للمنيو: ${r.wishFeature || '—'}
+
+━━━━━━━━━━━━━━━━━━
+🕐 ${time}
+    `.trim();
+  }
+
+  // ── SUBMIT ────────────────────────────────────────────────────────────
+  document.getElementById('feedbackForm').onsubmit = async function(e){
+    e.preventDefault();
+
+    const errors = [];
+    if(!validateSelect('visitType'))   errors.push('نوع الزيارة');
+    if(!validatePhone())               errors.push('رقم التليفون');
+    if(!validateUsage())               errors.push('عدد مرات الزيارة');
+
+    const ratingMap = {drinks:'row-drinks',food:'row-food',variety:'row-variety',value:'row-value',speed:'row-speed',staff:'row-staff',cleanliness:'row-cleanliness',ambience:'row-ambience'};
+    const ratingLabels = {drinks:'طعم المشروبات',food:'طعم الأكل',variety:'تنوع المنيو',value:'السعر مقابل القيمة',speed:'سرعة التحضير',staff:'تعامل الموظفين',cleanliness:'نظافة المكان',ambience:'الأجواء والديكور'};
+    ratingFields.forEach(f => { if(!validateRating(f, ratingMap[f])) errors.push(ratingLabels[f]); });
+    if(!validateNPS()) errors.push('NPS (هل تنصح بـ Way2Go)');
+
+    const summary = document.getElementById('valSummary');
+    const list    = document.getElementById('valList');
+    if(errors.length){
+      list.textContent = errors.join(' — ');
+      summary.classList.add('show');
+      summary.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+    summary.classList.remove('show');
+
+    const btn = this.querySelector('.submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = 'جاري الإرسال... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10" style="animation:spin 1s linear infinite;transform-origin:center"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></circle></svg>';
+
+    const data = new FormData(this);
+    const result = {};
+    data.forEach((v,k) => { result[k] = v; });
+
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id: CHAT_ID, text: buildMessage(result), parse_mode: 'Markdown' })
+      });
+      const json = await res.json();
+      if(!json.ok) throw new Error(json.description);
+    } catch(err) {
+      const saved = JSON.parse(localStorage.getItem('way2go_feedback')||'[]');
+      saved.push({ ...result, submitted_at: new Date().toISOString(), error: err.message });
+      localStorage.setItem('way2go_feedback', JSON.stringify(saved));
+    }
+
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressText').textContent = '100% مكتمل';
+    this.style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  // ── SCROLL REVEAL ─────────────────────────────────────────────────────
+  (function(){
+    const cards = document.querySelectorAll('.card');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if(e.isIntersecting){
+          setTimeout(() => e.target.classList.add('visible'), i * 60);
+          io.unobserve(e.target);
+        }
+      });
+    }, {threshold: 0.08});
+    cards.forEach(c => io.observe(c));
+  })();
+
+  // ── ENTRY CHOICE MODAL ─────────────────────────────────────────────────
+  (function(){
+    const MENU_URL = 'https://drive.google.com/drive/folders/1RRHsEYlA4A31rDP9Yjf-4uT9BGHyJ0pv?usp=sharing';
+    const overlay = document.getElementById('choiceOverlay');
+    const main = document.getElementById('mainContent');
+
+    document.getElementById('btnMenu').addEventListener('click', function(){
+      window.location.href = MENU_URL;
+    });
+
+    document.getElementById('btnFeedback').addEventListener('click', function(){
+      overlay.style.display = 'none';
+      main.style.display = 'block';
+    });
+  })();
+
+</script>
+</body>
+</html>
